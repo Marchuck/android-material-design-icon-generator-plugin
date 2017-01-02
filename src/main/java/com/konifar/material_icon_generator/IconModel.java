@@ -39,6 +39,8 @@ public class IconModel {
     private String fileName;
     private String resDir;
 
+    private String inputFileName;
+
     private boolean mdpi;
     private boolean hdpi;
     private boolean xhdpi;
@@ -92,7 +94,9 @@ public class IconModel {
 
             return sb.toString();
         } else {
-            return "";
+            if (inputFileName != null)
+                return inputFileName;
+            else return "";
         }
     }
 
@@ -105,6 +109,7 @@ public class IconModel {
     }
 
     private String getLocalDrawableIconPath(String fileName, String size) {
+
         StringBuilder sb = new StringBuilder();
         sb.append("/");
         String[] fileString = iconName.split("/");
@@ -286,4 +291,8 @@ public class IconModel {
         this.drawableV21 = drawableV21;
     }
 
+    public void setInputFileName(String inputFileName) {
+        System.out.println(inputFileName);
+        this.inputFileName = inputFileName;
+    }
 }

@@ -9,6 +9,9 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.JDOMUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
 import com.sun.org.apache.xml.internal.serializer.OutputPropertiesFactory;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Document;
@@ -32,7 +35,10 @@ import javax.swing.plaf.basic.ComboPopup;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
@@ -112,6 +118,8 @@ public class MaterialDesignIconGenerateDialog extends DialogWrapper {
     private JPanel panelVector;
     private JCheckBox checkBoxDrawable;
     private JCheckBox checkBoxDrawableV21;
+    public TextFieldWithBrowseButton browseAnything;
+
 
     public MaterialDesignIconGenerateDialog(@Nullable final Project project) {
         super(project, true);
@@ -130,6 +138,7 @@ public class MaterialDesignIconGenerateDialog extends DialogWrapper {
         initSizeCheckBox();
         initVectorCheckBox();
         initFileCustomColor();
+        initExternalSourceButton();
 
         initLabelLink(labelOverview, URL_OVERVIEW);
         initLabelLink(labelRepository, URL_REPOSITORY);
@@ -144,6 +153,43 @@ public class MaterialDesignIconGenerateDialog extends DialogWrapper {
         setCancelButtonText(CANCEL_BUTTON_LABEL);
 
         init();
+    }
+
+    private void initExternalSourceButton() {
+        browseAnything.setText(project.getBasePath() + DEFAULT_RES_DIR);
+        List<AndroidFacet> facets = AndroidUtils.getApplicationFacets(project);
+        // This code needs refined to support multiple facets and multiple resource directories
+        if (facets.size() >= 1) {
+            List<VirtualFile> allResourceDirectories = facets.get(0).getAllResourceDirectories();
+            if (allResourceDirectories.size() >= 1) {
+                browseAnything.setText(allResourceDirectories.get(0).getCanonicalPath());
+            }
+        }
+
+        browseAnything.addBrowseFolderListener(new TextBrowseFolderListener(
+                new FileChooserDescriptor(true, false, false, false, false, false), project));
+
+        browseAnything.getTextField().getDocument().addDocumentListener(new DocumentListener() {
+
+            @Override
+            public void insertUpdate(DocumentEvent event) {
+                setText();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent event) {
+                setText();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent event) {
+                setText();
+            }
+
+            void setText() {
+                if (model != null) model.setInputFileName(browseAnything.getText());
+            }
+        });
     }
 
     private void initImageTypeRadioButton() {
@@ -381,7 +427,7 @@ public class MaterialDesignIconGenerateDialog extends DialogWrapper {
             Document doc = JDOMUtil.loadDocument(getClass().getResourceAsStream(COLOR_PALETTE_COMBOBOX_XML));
 
             List<Element> elements = doc.getRootElement().getChildren();
-            for (org.jdom.Element element : elements) {
+            for (Element element : elements) {
                 String key = element.getAttributeValue("id");
                 colorPaletteMap.put(key, element.getText());
                 comboBoxColor.addItem(key);
@@ -468,7 +514,7 @@ public class MaterialDesignIconGenerateDialog extends DialogWrapper {
             Document doc = JDOMUtil.loadDocument(getClass().getResourceAsStream(FILE_ICON_COMBOBOX_XML));
 
             List<Element> elements = doc.getRootElement().getChildren();
-            for (org.jdom.Element element : elements) {
+            for (Element element : elements) {
                 comboBoxIcon.addItem(element.getText());
             }
         } catch (JDOMException e) {
@@ -758,16 +804,148 @@ public class MaterialDesignIconGenerateDialog extends DialogWrapper {
     }
 
     public boolean isConfirmed() {
-        Object[] options = {"Yes", "No"};
-        int option = JOptionPane.showOptionDialog(panelMain,
-                "Are you sure you want to generate '" + model.getFileName() + "' ?",
-                "Confirmation",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE,
-                new ImageIcon(getClass().getResource(ICON_CONFIRM)),
-                options,
-                options[0]);
+        return true;
+//        Object[] options = {"Yes", "No"};
+//        int option = JOptionPane.showOptionDialog(panelMain,
+//                "Are you sure you want to generate '" + model.getFileName() + "' ?",
+//                "Confirmation",
+//                JOptionPane.OK_CANCEL_OPTION,
+//                JOptionPane.PLAIN_MESSAGE,
+//                new ImageIcon(getClass().getResource(ICON_CONFIRM)),
+//                options,
+//                options[0]);
+//
+//        return option == JOptionPane.OK_OPTION;
+    }
 
-        return option == JOptionPane.OK_OPTION;
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
+    }
+
+    /**
+     * Method generated by IntelliJ IDEA GUI Designer
+     * >>> IMPORTANT!! <<<
+     * DO NOT edit this method OR call it in your code!
+     *
+     * @noinspection ALL
+     */
+    private void $$$setupUI$$$() {
+        panelMain = new JPanel();
+        panelMain.setLayout(new GridLayoutManager(10, 8, new Insets(8, 8, 8, 8), -1, -1));
+        final JLabel label1 = new JLabel();
+        label1.setText("Size: ");
+        panelMain.add(label1, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("Color: ");
+        panelMain.add(label2, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("Icon: ");
+        panelMain.add(label3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        comboBoxIcon = new FilterComboBox();
+        final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+        comboBoxIcon.setModel(defaultComboBoxModel1);
+        panelMain.add(comboBoxIcon, new GridConstraints(0, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(300, -1), new Dimension(300, -1), new Dimension(300, -1), 0, false));
+        comboBoxColor = new JComboBox();
+        panelMain.add(comboBoxColor, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        comboBoxDp = new JComboBox();
+        final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
+        defaultComboBoxModel2.addElement("18dp");
+        defaultComboBoxModel2.addElement("24dp");
+        defaultComboBoxModel2.addElement("36dp");
+        defaultComboBoxModel2.addElement("48dp");
+        comboBoxDp.setModel(defaultComboBoxModel2);
+        panelMain.add(comboBoxDp, new GridConstraints(2, 2, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, 1, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        textFieldFileName = new JTextField();
+        panelMain.add(textFieldFileName, new GridConstraints(3, 2, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, 1, new Dimension(300, -1), new Dimension(300, -1), new Dimension(300, -1), 0, false));
+        final JLabel label4 = new JLabel();
+        label4.setText("Name: ");
+        panelMain.add(label4, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(44, 38), null, 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setText("Res Directory:");
+        panelMain.add(label5, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        resDirectoryName = new TextFieldWithBrowseButton();
+        panelMain.add(resDirectoryName, new GridConstraints(4, 2, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, 1, new Dimension(300, -1), new Dimension(300, -1), new Dimension(300, -1), 0, false));
+        imageLabel = new JLabel();
+        imageLabel.setHorizontalAlignment(0);
+        imageLabel.setHorizontalTextPosition(0);
+        imageLabel.setText("");
+        imageLabel.setToolTipText("Material design icon preview");
+        panelMain.add(imageLabel, new GridConstraints(0, 7, 8, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(180, 180), null, null, 0, false));
+        final JSeparator separator1 = new JSeparator();
+        panelMain.add(separator1, new GridConstraints(8, 1, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JPanel panel1 = new JPanel();
+        panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        panelMain.add(panel1, new GridConstraints(9, 1, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        labelOverview = new JLabel();
+        labelOverview.setText("<html>Show <a href=\"http://google.github.io/material-design-icons/\">icons overview</a> </html>");
+        panel1.add(labelOverview);
+        labelRepository = new JLabel();
+        labelRepository.setText("<html>or <a href=\"https://github.com/google/material-design-icons\">github repository</a>.</html>");
+        panel1.add(labelRepository);
+        panelImageSize = new JPanel();
+        panelImageSize.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panelMain.add(panelImageSize, new GridConstraints(6, 2, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panelImageSize.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), null));
+        checkBoxMdpi = new JCheckBox();
+        checkBoxMdpi.setSelected(true);
+        checkBoxMdpi.setText("mdpi");
+        panelImageSize.add(checkBoxMdpi, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        checkBoxHdpi = new JCheckBox();
+        checkBoxHdpi.setSelected(true);
+        checkBoxHdpi.setText("hdpi");
+        panelImageSize.add(checkBoxHdpi, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        checkBoxXhdpi = new JCheckBox();
+        checkBoxXhdpi.setSelected(true);
+        checkBoxXhdpi.setText("xhdpi");
+        panelImageSize.add(checkBoxXhdpi, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        checkBoxXxhdpi = new JCheckBox();
+        checkBoxXxhdpi.setSelected(true);
+        checkBoxXxhdpi.setText("xxhdpi");
+        panelImageSize.add(checkBoxXxhdpi, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        checkBoxXxxhdpi = new JCheckBox();
+        checkBoxXxxhdpi.setSelected(true);
+        checkBoxXxxhdpi.setText("xxxhdpi");
+        panelImageSize.add(checkBoxXxxhdpi, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        radioImage = new JRadioButton();
+        radioImage.setMargin(new Insets(1, 0, 0, 1));
+        radioImage.setText("Image");
+        panelMain.add(radioImage, new GridConstraints(6, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        radioVector = new JRadioButton();
+        radioVector.setActionCommand("Vector:");
+        radioVector.setLabel("Vector");
+        radioVector.setText("Vector");
+        panelMain.add(radioVector, new GridConstraints(7, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer1 = new Spacer();
+        panelMain.add(spacer1, new GridConstraints(5, 2, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 8), null, null, 0, false));
+        panelVector = new JPanel();
+        panelVector.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panelMain.add(panelVector, new GridConstraints(7, 2, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panelVector.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), null));
+        checkBoxDrawable = new JCheckBox();
+        checkBoxDrawable.setSelected(true);
+        checkBoxDrawable.setText("drawable");
+        panelVector.add(checkBoxDrawable, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        checkBoxDrawableV21 = new JCheckBox();
+        checkBoxDrawableV21.setMargin(new Insets(1, 1, 0, 8));
+        checkBoxDrawableV21.setSelected(false);
+        checkBoxDrawableV21.setText("drawable-v21");
+        panelVector.add(checkBoxDrawableV21, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        textFieldColorCode = new JTextField();
+        textFieldColorCode.setText("");
+        panelMain.add(textFieldColorCode, new GridConstraints(1, 3, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(140, -1), null, 0, false));
+        final Spacer spacer2 = new Spacer();
+        panelMain.add(spacer2, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        browseAnything = new TextFieldWithBrowseButton();
+        panelMain.add(browseAnything, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return panelMain;
     }
 }
